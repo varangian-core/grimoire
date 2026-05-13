@@ -5,89 +5,441 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>grimoire</title>
   <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-2: #1c2128;
+      --border: #30363d;
+      --border-2: #21262d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --dim: #484f58;
+      --accent: #58a6ff;
+      --purple: #d2a8ff;
+      --green: #3fb950;
+      --orange: #f0883e;
+      --red: #f85149;
+      --radius: 8px;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
-      padding: 3rem 1.5rem;
+      min-height: 100vh;
     }
-    .container { max-width: 760px; margin: 0 auto; }
-    h1 { font-size: 2rem; font-weight: 700; margin-bottom: .3rem; }
-    .subtitle { color: #8b949e; margin-bottom: .75rem; font-size: 1rem; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    /* Header */
+    h1 { font-size: 2rem; font-weight: 700; }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .2rem; }
     .tagline {
       display: inline-block;
-      background: #6e40c922;
-      border: 1px solid #6e40c955;
-      color: #d2a8ff;
+      background: #6e40c918;
+      border: 1px solid #6e40c944;
+      color: var(--purple);
       border-radius: 2rem;
-      font-size: .75rem;
+      font-size: .72rem;
       padding: .15rem .75rem;
-      margin-bottom: 2.5rem;
+      margin-top: .6rem;
+      letter-spacing: .03em;
     }
-    h2 { font-size: .8rem; font-weight: 600; color: #8b949e; text-transform: uppercase;
-         letter-spacing: .08em; margin: 2.25rem 0 .75rem; }
-    pre {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      padding: 1rem 1.25rem;
-      overflow-x: auto;
-      font-size: .82rem;
-      margin-bottom: 1rem;
+    header { margin-bottom: 2.5rem; }
+
+    /* Filters */
+    .filters { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-tab {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 2rem;
+      font-size: .8rem;
+      padding: .25rem .9rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
     }
-    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
-    .scripts { display: flex; flex-direction: column; gap: .75rem; margin-top: .5rem; }
+    .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Cards */
+    .script-list { display: flex; flex-direction: column; gap: .75rem; }
     .script-card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: border-color .15s;
     }
-    .script-card .name { font-family: monospace; color: #58a6ff; font-size: .9rem; font-weight: 600; }
-    .script-card .desc { color: #8b949e; font-size: .85rem; margin-top: .25rem; }
-    .script-card .raw { font-family: monospace; font-size: .75rem; color: #484f58; margin-top: .4rem; word-break: break-all; }
-    .provider-label {
-      font-size: .7rem;
+    .script-card:hover { border-color: var(--dim); }
+    .card-body { flex: 1; min-width: 0; }
+    .provider-badge {
+      font-size: .68rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .1em;
-      color: #3fb950;
-      margin-bottom: .4rem;
+      margin-bottom: .3rem;
     }
-    a { color: #58a6ff; text-decoration: none; }
+    .p-gcp { color: var(--green); }
+    .p-github { color: var(--accent); }
+    .p-aws { color: var(--orange); }
+    .card-name {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: .3rem;
+    }
+    .card-desc { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+    .btn-configure {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      font-size: .8rem;
+      padding: .35rem .9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .btn-configure:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Modal */
+    .modal {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal.open { opacity: 1; pointer-events: all; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.75); }
+    .modal-panel {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%; max-width: 640px;
+      max-height: 90vh; overflow-y: auto;
+      transform: translateY(10px);
+      transition: transform .2s;
+    }
+    .modal.open .modal-panel { transform: translateY(0); }
+    .modal-head {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem 0; gap: 1rem;
+    }
+    .modal-head h2 { font-size: 1rem; font-weight: 600; margin-top: .15rem; }
+    .modal-provider {
+      display: block; font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: .15rem;
+    }
+    .modal-close {
+      background: none; border: none;
+      color: var(--muted); font-size: 1.4rem; cursor: pointer;
+      line-height: 1; padding: 0 .3rem; flex-shrink: 0;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1rem 1.5rem 1.5rem; }
+    .modal-desc { color: var(--muted); font-size: .875rem; margin-bottom: .4rem; }
+    .modal-file { font-family: monospace; font-size: .72rem; color: var(--dim); margin-bottom: 1.25rem; word-break: break-all; }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .7rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: .3rem; }
+    .form-group.wide { grid-column: 1 / -1; }
+    .form-label {
+      font-size: .75rem; font-weight: 600;
+      color: var(--muted);
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .req { color: var(--red); }
+    .opt { color: var(--dim); font-weight: 400; }
+    .form-input {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: .85rem;
+      padding: .45rem .75rem;
+      font-family: inherit;
+      transition: border-color .15s;
+      width: 100%;
+    }
+    .form-input::placeholder { color: var(--dim); }
+    .form-input:focus { outline: none; border-color: var(--accent); }
+    .form-hint { font-size: .72rem; color: var(--dim); line-height: 1.4; }
+    .cron-label { color: var(--purple); }
+
+    /* Command */
+    .cmd-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .cmd-head {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: .55rem 1rem;
+      border-bottom: 1px solid var(--border-2);
+    }
+    .cmd-label {
+      font-size: .7rem; font-weight: 700;
+      color: var(--dim); text-transform: uppercase; letter-spacing: .08em;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 4px;
+      font-size: .75rem;
+      padding: .2rem .65rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    .cmd-pre {
+      padding: .85rem 1rem;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .8rem;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre;
+    }
+
+    /* Misc */
+    .empty { text-align: center; color: var(--dim); padding: 3rem 0; font-size: .9rem; }
+    footer { margin-top: 4rem; color: var(--dim); font-size: .8rem; }
+    a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    footer { margin-top: 4rem; color: #484f58; font-size: .8rem; }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="wrap">
+  <header>
     <h1>grimoire</h1>
     <p class="subtitle">AI-consumable automation scripts for GCP, GitHub, and beyond.</p>
     <span class="tagline">fetch · discover · execute</span>
+  </header>
 
-    <h2>For AI assistants</h2>
-    <pre><code># Step 1 — read the index
-curl -fsSL https://raw.githubusercontent.com/varangian-core/grimoire/main/SCRIPTS.md
+  <div class="filters" id="filters"></div>
+  <div class="script-list" id="script-list"><div class="empty">Loading scripts…</div></div>
 
-# Step 2 — run a script
-URI=https://your-service.run.app/healthz \
-  bash &lt;(curl -fsSL https://raw.githubusercontent.com/varangian-core/grimoire/main/gcp/cloud-run-keepalive.sh)</code></pre>
+  <footer>
+    <a href="https://github.com/varangian-core/grimoire">github.com/varangian-core/grimoire</a>
+    &nbsp;·&nbsp;
+    <a href="https://raw.githubusercontent.com/varangian-core/grimoire/main/SCRIPTS.md">SCRIPTS.md</a>
+    &nbsp;·&nbsp;
+    <a href="https://raw.githubusercontent.com/varangian-core/grimoire/main/scripts.json">scripts.json</a>
+  </footer>
+</div>
 
-    <h2>Available scripts</h2>
-    <div class="scripts">
-      <div class="script-card">
-        <div class="provider-label">GCP</div>
-        <div class="name">gcp/cloud-run-keepalive.sh</div>
-        <div class="desc">Creates a Cloud Scheduler job that pings a Cloud Run endpoint on a cron schedule to prevent cold-starts. Supports public and IAM-authenticated services.</div>
-        <div class="raw">https://raw.githubusercontent.com/varangian-core/grimoire/main/gcp/cloud-run-keepalive.sh</div>
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-backdrop" id="backdrop"></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div>
+        <span class="modal-provider" id="m-provider"></span>
+        <h2 id="m-name"></h2>
+      </div>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="m-desc"></p>
+      <p class="modal-file" id="m-file"></p>
+      <form id="m-form" onsubmit="return false"></form>
+      <div class="cmd-section">
+        <div class="cmd-head">
+          <span class="cmd-label">Generated command</span>
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+        </div>
+        <div class="cmd-pre" id="cmd-out"></div>
       </div>
     </div>
-
-    <footer>
-      <a href="https://github.com/varangian-core/grimoire">github.com/varangian-core/grimoire</a>
-    </footer>
   </div>
+</div>
+
+<script>
+  let scripts = [];
+  let activeFilter = 'all';
+  let current = null;
+  let vals = {};
+
+  async function init() {
+    try {
+      const data = await fetch('./scripts.json').then(r => r.json());
+      scripts = data.scripts;
+    } catch {
+      document.getElementById('script-list').innerHTML =
+        '<div class="empty">Could not load scripts.json</div>';
+      return;
+    }
+    renderFilters();
+    renderList();
+  }
+
+  function renderFilters() {
+    const providers = ['all', ...new Set(scripts.map(s => s.provider))];
+    document.getElementById('filters').innerHTML = providers.map(p =>
+      `<button class="filter-tab${p === activeFilter ? ' active' : ''}" data-p="${esc(p)}">
+         ${p === 'all' ? 'All' : p.toUpperCase()}
+       </button>`
+    ).join('');
+    document.querySelectorAll('.filter-tab').forEach(b =>
+      b.addEventListener('click', () => { activeFilter = b.dataset.p; renderFilters(); renderList(); })
+    );
+  }
+
+  function renderList() {
+    const list = activeFilter === 'all' ? scripts : scripts.filter(s => s.provider === activeFilter);
+    document.getElementById('script-list').innerHTML = list.length
+      ? list.map(s => `
+          <div class="script-card">
+            <div class="card-body">
+              <div class="provider-badge p-${esc(s.provider)}">${esc(s.provider.toUpperCase())}</div>
+              <div class="card-name">${esc(s.file)}</div>
+              <div class="card-desc">${esc(s.description)}</div>
+            </div>
+            <button class="btn-configure" data-id="${esc(s.id)}">Configure →</button>
+          </div>`).join('')
+      : '<div class="empty">No scripts found.</div>';
+
+    document.querySelectorAll('.btn-configure').forEach(b =>
+      b.addEventListener('click', () => openModal(scripts.find(s => s.id === b.dataset.id)))
+    );
+  }
+
+  function openModal(s) {
+    current = s;
+    vals = Object.fromEntries(s.args.map(a => [a.name, a.default || '']));
+    document.getElementById('m-provider').textContent = s.provider.toUpperCase();
+    document.getElementById('m-provider').className = `modal-provider p-${s.provider}`;
+    document.getElementById('m-name').textContent = s.name;
+    document.getElementById('m-desc').textContent = s.description;
+    document.getElementById('m-file').textContent = s.raw;
+    buildForm(s);
+    refreshCmd();
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function buildForm(s) {
+    const form = document.getElementById('m-form');
+    form.innerHTML = `<div class="form-grid">${s.args.map(a => {
+      const wide = a.name === 'URI' || a.name.includes('ACCOUNT') || a.name.includes('NAME');
+      const isCron = a.type === 'cron';
+      return `
+        <div class="form-group${wide ? ' wide' : ''}">
+          <label class="form-label" for="f-${a.name}">
+            ${esc(a.name)}
+            ${a.required
+              ? '<span class="req">*</span>'
+              : '<span class="opt">optional</span>'}
+          </label>
+          <input class="form-input" id="f-${a.name}" data-name="${esc(a.name)}" type="text"
+            placeholder="${esc(a.placeholder || a.default || '')}"
+            value="${esc(vals[a.name] || '')}">
+          ${isCron ? `<span class="form-hint cron-label" id="ch-${a.name}">${describeCron(vals[a.name] || '')}</span>` : ''}
+          <span class="form-hint">${esc(a.description)}</span>
+        </div>`;
+    }).join('')}</div>`;
+
+    form.querySelectorAll('.form-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        vals[inp.dataset.name] = inp.value;
+        const arg = current.args.find(a => a.name === inp.dataset.name);
+        if (arg?.type === 'cron') {
+          const ch = document.getElementById(`ch-${arg.name}`);
+          if (ch) ch.textContent = describeCron(inp.value);
+        }
+        refreshCmd();
+      });
+    });
+  }
+
+  function refreshCmd() {
+    if (!current) return;
+    const parts = [];
+    for (const a of current.args) {
+      const v = (vals[a.name] || '').trim();
+      if (a.required) {
+        parts.push(`${a.name}=${v ? quote(v) : '<required>'}`);
+      } else if (v && v !== (a.default || '')) {
+        parts.push(`${a.name}=${quote(v)}`);
+      }
+    }
+    parts.push(`bash <(curl -fsSL ${current.raw})`);
+    document.getElementById('cmd-out').textContent = parts.join(' \\\n  ');
+  }
+
+  function quote(v) {
+    return /[^\w@./:=-]/.test(v) ? `'${v.replace(/'/g, "'\\''")}'` : v;
+  }
+
+  function describeCron(expr) {
+    const p = expr.trim().split(/\s+/);
+    if (p.length !== 5) return '';
+    const [m, h, , , dw] = p;
+    if (m.startsWith('*/') && h === '*') {
+      const n = +m.slice(2);
+      return `— every ${n === 1 ? 'minute' : n + ' minutes'}`;
+    }
+    if (m === '0' && h.startsWith('*/')) {
+      const n = +h.slice(2);
+      return `— every ${n === 1 ? 'hour' : n + ' hours'}`;
+    }
+    if (m === '0' && h === '0') return '— daily at midnight';
+    if (m === '0' && h === '12') return '— daily at noon';
+    if (m !== '*' && h !== '*' && p[2] === '*' && p[3] === '*' && dw === '*') {
+      return `— daily at ${h.padStart(2,'0')}:${m.padStart(2,'0')}`;
+    }
+    return '';
+  }
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('backdrop').addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('cmd-out').textContent).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+
+  init();
+</script>
 </body>
 </html>

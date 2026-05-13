@@ -1,0 +1,59 @@
+{
+  "version": "1",
+  "scripts": [
+    {
+      "id": "gcp-cloud-run-keepalive",
+      "provider": "gcp",
+      "name": "Cloud Run Keep-Alive",
+      "description": "Creates a Google Cloud Scheduler job that pings a Cloud Run endpoint on a cron schedule to prevent cold-starts. Supports public and IAM-authenticated (OIDC) services.",
+      "file": "gcp/cloud-run-keepalive.sh",
+      "raw": "https://raw.githubusercontent.com/varangian-core/grimoire/main/gcp/cloud-run-keepalive.sh",
+      "args": [
+        {
+          "name": "URI",
+          "required": true,
+          "description": "Full URL of the endpoint to ping",
+          "placeholder": "https://your-service.run.app/healthz"
+        },
+        {
+          "name": "JOB_NAME",
+          "required": false,
+          "default": "keep-alive-tick",
+          "description": "Cloud Scheduler job name"
+        },
+        {
+          "name": "SCHEDULE",
+          "required": false,
+          "default": "*/5 * * * *",
+          "type": "cron",
+          "description": "Cron expression for ping frequency",
+          "placeholder": "*/5 * * * *"
+        },
+        {
+          "name": "LOCATION",
+          "required": false,
+          "default": "us-east1",
+          "description": "GCP region"
+        },
+        {
+          "name": "TIMEZONE",
+          "required": false,
+          "default": "America/New_York",
+          "description": "Scheduler timezone"
+        },
+        {
+          "name": "SERVICE_ACCOUNT",
+          "required": false,
+          "description": "Service account email for private IAM-authenticated services",
+          "placeholder": "my-sa@project.iam.gserviceaccount.com"
+        },
+        {
+          "name": "SERVICE_NAME",
+          "required": false,
+          "description": "Cloud Run service name (required when SERVICE_ACCOUNT is set)",
+          "placeholder": "my-cloud-run-service"
+        }
+      ]
+    }
+  ]
+}
